@@ -13,8 +13,8 @@ import lejos.hardware.sensor.*;
 
 public class Golfbane{
 	public static void sving(){
-		Motor.B.rotate(720);
-		Motor.C.rotate(-720);
+		Motor.B.rotate(360);
+		Motor.C.rotate(-360);
 		while (Motor.A.isMoving()||Motor.B.isMoving()) Thread.yield();
 	}
 
@@ -25,7 +25,7 @@ public class Golfbane{
 
 	public static void main(String[] args) throws Exception{
 
-		// Thread for å stoppe program (kjører parallelt med resten)
+		// Thread for Ã¥ stoppe program (kjÃ¸rer parallelt med resten)
 		new Thread("Stopper") {
 			@Override
 			public void run() {
@@ -62,10 +62,10 @@ public class Golfbane{
 		// Definer motor
 		// Venstre
 		Motor.B.setSpeed(450);
-		// Høyre
+		// HÃ¸yre
 		Motor.C.setSpeed(450);
 
-		// Vent på knapp enter for å starte
+		// Vent pÃ¥ knapp enter for Ã¥ starte
 		lcd.drawString("Trykk enter starte", 0, 1);
 		Button.ENTER.waitForPressAndRelease();
 
