@@ -14,19 +14,6 @@ import lejos.hardware.sensor.*;
 
 public class Golfbane{
 	public static void main(String[] args) throws Exception{
-
-		/*// Thread for å stoppe program (kjører parallelt med resten)
-		new Thread("Stopper") {
-			@Override
-			public void run() {
-				while (true){
-					if (Button.ESCAPE.isDown() && Button.ENTER.isDown()){
-						System.exit(0);
-					}
-				}
-			}
-      	}.start();*/
-
 		//variabler
 		boolean go = true;
 		float dist = 0;
@@ -54,10 +41,10 @@ public class Golfbane{
 		// Definer motor
 		// Venstre
 		Motor.B.setSpeed(450);
-		// Høyre
+		// HÃ¸yre
 		Motor.C.setSpeed(450);
 
-		// Vent på knapp enter for å starte
+		// Vent pÃ¥ knapp enter for Ã¥ starte
 		lcd.drawString("Trykk enter starte", 0, 1);
 		keys.waitForAnyPress();
 
@@ -100,7 +87,7 @@ public class Golfbane{
 
 				Motor.B.setSpeed(450);
 				Motor.C.setSpeed(450);
-				// Kjør
+				// KjÃ¸r
 				Motor.B.forward();
 				Motor.C.forward();
 				go=false;
