@@ -6,14 +6,40 @@ import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
 import lejos.hardware.ev3.EV3;
 import lejos.hardware.Keys;
+import lejos.hardware.Button;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 import lejos.hardware.sensor.*;
 
 public class Golfbane{
+	public static void sving(){
+		Motor.B.rotate(720);
+		Motor.C.rotate(-720);
+		while (Motor.A.isMoving()||Motor.B.isMoving()) Thread.yield();
+	}
+
+	public static void kjor(){
+		Motor.B.forward();
+		Motor.C.forward();
+	}
+
 	public static void main(String[] args) throws Exception{
-		// Variabler
-		int stop = 0;
+
+		// Thread for å stoppe program (kjører parallelt med resten)
+		new Thread("Stopper") {
+			@Override
+			public void run() {
+				while (true){
+					if (Button.ESCAPE.isDown() && Button.ENTER.isDown()){
+						System.exit(0);
+					}
+				}
+			}
+      	}.start();
+
+		//variabler
+		boolean go = true;
+		float dist = 0;
 
 		// Definer boks
 		Brick legogo = BrickFinder.getDefault();
@@ -33,22 +59,33 @@ public class Golfbane{
 		SampleProvider leser = sensor.getDistanceMode();
 		float[] data = new float[leser.sampleSize()];
 
-		// Vent for knappetrykk for å starte
-		lcd.drawString("Trykk for starte", 0, 1);
-		keys.waitForAnyPress();
+		// Definer motor
+		// Venstre
+		Motor.B.setSpeed(450);
+		// Høyre
+		Motor.C.setSpeed(450);
+
+		// Vent på knapp enter for å starte
+		lcd.drawString("Trykk enter starte", 0, 1);
+		Button.ENTER.waitForPressAndRelease();
 
 		// Hoved loop
-		while (stop<=20){
-			stop+=stop;
-
+		lcd.drawString("Kjorer", 0,5);
+		while (true){
 			// Hent data fra leser, legg i data plass 0
 			leser.fetchSample(data, 0);
+			dist = data[0];
 
-			// Skriv data fra plass 0
-			System.out.println("Avstand: " + data[0]);
-
-			// Sleep 1 sec
-			Thread.sleep(1000);
+			// Sjekk om sensor distanse er > 0.2
+			if (dist<0.2&!go){
+				lcd.drawString("Svinger", 0,5);
+				sving();
+				go=true;
+			} else if (dist>0.2&&go){
+				lcd.drawString("Kjorer", 0,5);
+				kjor();
+				go=false;
+			}
 		}
 	}
 }
