@@ -12,17 +12,6 @@ import lejos.robotics.SampleProvider;
 import lejos.hardware.sensor.*;
 
 public class Golfbane{
-	public static void sving(){
-		Motor.B.rotate(720);
-		Motor.C.rotate(-720);
-		while (Motor.A.isMoving()||Motor.B.isMoving()) Thread.yield();
-	}
-
-	public static void kjor(){
-		Motor.B.forward();
-		Motor.C.forward();
-	}
-
 	public static void main(String[] args) throws Exception{
 
 		// Thread for å stoppe program (kjører parallelt med resten)
@@ -40,6 +29,8 @@ public class Golfbane{
 		//variabler
 		boolean go = true;
 		float dist = 0;
+		float leftD = 0;
+		float rightD = 0;
 
 		// Definer boks
 		Brick legogo = BrickFinder.getDefault();
@@ -78,12 +69,54 @@ public class Golfbane{
 
 			// Sjekk om sensor distanse er > 0.2
 			if (dist<0.2&!go){
+				// Skriv tekst
 				lcd.drawString("Svinger", 0,5);
-				sving();
+
+				// Sving litt venstre
+				Motor.B.rotate(90);
+				Motor.C.rotate(-90);
+				while (Motor.A.isMoving()||Motor.B.isMoving()) Thread.yield();
+				Thread.sleep(200);
+
+				// Sjekk sensor
+				leser.fetchSample(data, 0);
+				dist = data[0];
+				rightD=dist;
+
+				// Sving høyre
+				Motor.B.rotate(-180);
+				Motor.C.rotate(180);
+				while (Motor.A.isMoving()||Motor.B.isMoving()) Thread.yield();
+				Thread.sleep(200);
+
+				// Sjekk sensor
+				leser.fetchSample(data, 0);
+				dist = data[0];
+				leftD=dist;
+
+				// Tilbake til org. posisjon
+				Motor.B.rotate(90);
+				Motor.C.rotate(-90);
+				Thread.sleep(200);
+
+				// Velg retning med mest rom og sving
+				if (leftD>rightD){
+					Motor.B.rotate(180);
+					Motor.C.rotate(-180);
+				} else {
+					Motor.B.rotate(-180);
+					Motor.C.rotate(180);
+				}
+				while (Motor.A.isMoving()||Motor.B.isMoving()) Thread.yield();
+
 				go=true;
 			} else if (dist>0.2&&go){
+				// Skriv tekst
 				lcd.drawString("Kjorer", 0,5);
-				kjor();
+
+				// Kjør
+				Motor.B.forward();
+				Motor.C.forward();
 				go=false;
 			}
 		}
