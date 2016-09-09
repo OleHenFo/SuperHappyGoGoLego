@@ -33,6 +33,9 @@ public class GolfbaneLyd{
 		// Definer knapper
 		Keys keys = ev3.getKeys();
 
+		// Definerer r2 d2
+		File myFile = new File("r2-d2.wav");
+
 		// Port
 		Port s4 = legogo.getPort("S4");
 		Port s1 = legogo.getPort("S1");
@@ -66,7 +69,7 @@ public class GolfbaneLyd{
 				lcd.drawString("Svinger", 0,5);
 
 				//R2D2 sound
-				File myFile = new File("r2-d2");
+				Sound.playSample(myFile);
 
 
 				while(dist<0.4){
