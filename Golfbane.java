@@ -64,12 +64,6 @@ public class Golfbane{
 		SampleProvider leserH = tsh.getTouchMode();
 		float[] dataH = new float[leserH.sampleSize()];*/
 
-		// Definer motor
-		// Venstre
-		Motor.B.setSpeed(450);
-		// Høyre
-		Motor.C.setSpeed(450);
-
 		// Vent på knapp enter for å starte
 		lcd.drawString("Trykk enter starte", 0, 1);
 		keys.waitForAnyPress();
@@ -108,6 +102,7 @@ public class Golfbane{
 
 			// Sjekk om sensor distanse er > 0.2
 			if (dist<0.2&!go){
+
 				// Skriv tekst
 				lcd.drawString("Svinger", 0,5);
 				Motor.B.stop();
@@ -115,9 +110,12 @@ public class Golfbane{
 				Sound.twoBeeps();
 
 				while(dist<0.4){
+
+					// Sving sakte
 					Motor.B.setSpeed(200);
 					Motor.C.setSpeed(200);
-					// Sving litt venstre
+
+					// Sving venstre eller høyre, ut fra random variabel
 					if (dir == 1){
 						Motor.B.forward();
 						Motor.C.backward();
@@ -137,6 +135,8 @@ public class Golfbane{
 
 				go=true;
 			} else if (dist>0.2&&go){
+
+				// Set random variabel
 				dir = rand.nextInt(2);
 
 				// Skriv tekst
