@@ -70,6 +70,14 @@ public class Golfbane{
 
 		// Hoved loop
 		lcd.drawString("Kjorer", 0,5);
+
+		Motor.B.setSpeed(400);
+		Motor.C.setSpeed(400);
+
+		Motor.B.forward();
+		Motor.C.forward();
+
+		go=true;
 		while (true){
 			/*// Trykksensor kode
 			leserV.fetchSample(dataV, 0);
@@ -105,9 +113,9 @@ public class Golfbane{
 
 				// Skriv tekst
 				lcd.drawString("Svinger", 0,5);
-				Motor.B.stop();
-				Motor.C.stop();
-				Sound.twoBeeps();
+				//Motor.B.stop();
+				//Motor.C.stop();
+				//Sound.twoBeeps();
 
 				while(dist<0.4){
 
@@ -117,9 +125,11 @@ public class Golfbane{
 
 					// Sving venstre eller høyre, ut fra random variabel
 					if (dir == 1){
+						// Høyre
 						Motor.B.forward();
 						Motor.C.backward();
 					} else {
+						// Venstre
 						Motor.B.backward();
 						Motor.C.forward();
 					}
