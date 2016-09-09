@@ -45,10 +45,10 @@ public class GolfbaneLyd{
 		// Definer motor
 		// Venstre
 		Motor.B.setSpeed(450);
-		// Høyre
+		// HÃ¸yre
 		Motor.C.setSpeed(450);
 
-		// Vent på knapp enter for å starte
+		// Vent pÃ¥ knapp enter for Ã¥ starte
 		lcd.drawString("Trykk enter starte", 0, 1);
 		keys.waitForAnyPress();
 
@@ -63,6 +63,9 @@ public class GolfbaneLyd{
 			if (dist<0.2&!go){
 				// Skriv tekst
 				lcd.drawString("Svinger", 0,5);
+
+				//Beep beep
+				Sound.twoBeeps();
 
 				while(dist<0.4){
 					Motor.B.setSpeed(200);
@@ -86,15 +89,14 @@ public class GolfbaneLyd{
 				Motor.B.setSpeed(500);
 				Motor.C.setSpeed(500);
 
-				//Beep beep
-				Sound.twoBeeps();
+
 
 				// Skriv tekst
 				lcd.drawString("Kjorer", 0,5);
 
 				Motor.B.setSpeed(450);
 				Motor.C.setSpeed(450);
-				// Kjør
+				// KjÃ¸r
 				Motor.B.forward();
 				Motor.C.forward();
 				go=false;
