@@ -15,6 +15,7 @@ import lejos.hardware.Sound;
 import java.io.File;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import static java.lang.System.out;
 
 public class GolfbaneLyd{
 	public static void main(String[] args) throws Exception{
@@ -64,8 +65,9 @@ public class GolfbaneLyd{
 				// Skriv tekst
 				lcd.drawString("Svinger", 0,5);
 
-				//Beep beep
-				Sound.twoBeeps();
+				//R2D2 sound
+				File myFile = new File("r2-d2");
+
 
 				while(dist<0.4){
 					Motor.B.setSpeed(200);
@@ -88,8 +90,6 @@ public class GolfbaneLyd{
 				// Venstre
 				Motor.B.setSpeed(500);
 				Motor.C.setSpeed(500);
-
-
 
 				// Skriv tekst
 				lcd.drawString("Kjorer", 0,5);
