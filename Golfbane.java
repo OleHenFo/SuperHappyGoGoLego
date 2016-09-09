@@ -1,6 +1,7 @@
 import lejos.hardware.motor.*;
 import lejos.hardware.lcd.*;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.hardware.port.Port;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
@@ -10,11 +11,12 @@ import lejos.hardware.Button;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 import lejos.hardware.sensor.*;
+import java.util.Random;
 
 public class Golfbane{
 	public static void main(String[] args) throws Exception{
 
-		// Thread for å stoppe program (kjører parallelt med resten)
+		/*// Thread for å stoppe program (kjører parallelt med resten)
 		new Thread("Stopper") {
 			@Override
 			public void run() {
@@ -24,13 +26,12 @@ public class Golfbane{
 					}
 				}
 			}
-      	}.start();
+      	}.start();*/
 
 		//variabler
 		boolean go = true;
 		float dist = 0;
-		float leftD = 0;
-		float rightD = 0;
+		int dir = 1;
 
 		// Definer boks
 		Brick legogo = BrickFinder.getDefault();
@@ -44,8 +45,10 @@ public class Golfbane{
 
 		// Port
 		Port s4 = legogo.getPort("S4");
+		Port s1 = legogo.getPort("S1");
+		Port s2 = legogo.getPort("S2");
 
-		// Definer sensor
+		// Definer ultra sensor
 		EV3UltrasonicSensor sensor = new EV3UltrasonicSensor(s4);
 		SampleProvider leser = sensor.getDistanceMode();
 		float[] data = new float[leser.sampleSize()];
@@ -58,7 +61,7 @@ public class Golfbane{
 
 		// Vent på knapp enter for å starte
 		lcd.drawString("Trykk enter starte", 0, 1);
-		Button.ENTER.waitForPressAndRelease();
+		keys.waitForAnyPress();
 
 		// Hoved loop
 		lcd.drawString("Kjorer", 0,5);
@@ -72,48 +75,42 @@ public class Golfbane{
 				// Skriv tekst
 				lcd.drawString("Svinger", 0,5);
 
-				// Sving litt venstre
-				Motor.B.rotate(90);
-				Motor.C.rotate(-90);
-				while (Motor.A.isMoving()||Motor.B.isMoving()) Thread.yield();
-				Thread.sleep(200);
+				while(dist<0.4){
+					Motor.B.setSpeed(200);
+					Motor.C.setSpeed(200);
+					// Sving litt venstre
+					if (dir == 1){
+						Motor.B.forward();
+						Motor.C.backward();
+					} else {
+						Motor.B.backward();
+						Motor.C.forward();
+					}
+					Thread.sleep(300);
 
-				// Sjekk sensor
-				leser.fetchSample(data, 0);
-				dist = data[0];
-				rightD=dist;
+					//Motor.B.stop();
+					//Motor.C.stop();
 
-				// Sving høyre
-				Motor.B.rotate(-180);
-				Motor.C.rotate(180);
-				while (Motor.A.isMoving()||Motor.B.isMoving()) Thread.yield();
-				Thread.sleep(200);
-
-				// Sjekk sensor
-				leser.fetchSample(data, 0);
-				dist = data[0];
-				leftD=dist;
-
-				// Tilbake til org. posisjon
-				Motor.B.rotate(90);
-				Motor.C.rotate(-90);
-				Thread.sleep(200);
-
-				// Velg retning med mest rom og sving
-				if (leftD>rightD){
-					Motor.B.rotate(180);
-					Motor.C.rotate(-180);
-				} else {
-					Motor.B.rotate(-180);
-					Motor.C.rotate(180);
+					// Sjekk sensor
+					leser.fetchSample(data, 0);
+					dist = data[0];
 				}
-				while (Motor.A.isMoving()||Motor.B.isMoving()) Thread.yield();
 
 				go=true;
 			} else if (dist>0.2&&go){
+				Random rand = new Random();
+				dir = rand.nextInt(1);
+
+				// Venstre
+				Motor.B.setSpeed(500);
+				// Høyre
+				Motor.C.setSpeed(500);
+
 				// Skriv tekst
 				lcd.drawString("Kjorer", 0,5);
 
+				Motor.B.setSpeed(450);
+				Motor.C.setSpeed(450);
 				// Kjør
 				Motor.B.forward();
 				Motor.C.forward();
