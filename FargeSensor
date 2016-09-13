@@ -1,0 +1,52 @@
+/**
+* 
+* Kode for å teste fargesensor med kode
+* Dette programmet skal i utgangspunktet måle og sette en verdi for svart,
+* deretter vil den printe ut verdier, så lenge verdien ikke er svart
+* om verdien er svart vil den kjøre fremover
+*/
+
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.motor.*;
+import lejos.hardware.Brick;
+import lejos.hardware.BrickFinder;
+import lejos.robotics.SampleProvider;
+import lejos.hardware.port.Port;
+
+public class FargeSensor{
+
+  public static void main (String[] arg) throws Exception  {
+
+	// Definerer sensorer:
+	Brick brick = BrickFinder.getDefault();
+    Port s1 = brick.getPort("S1"); // fargesensor
+
+    EV3ColorSensor fargesensor = new EV3ColorSensor(s1); // ev3-fargesensor
+	SampleProvider fargeLeser = fargesensor.getMode("RGB");  // svart = 0.01..
+	float[] fargeSample = new float[fargeLeser.sampleSize()];  // tabell som innholder avlest verdi
+
+	// Setter hastighet på roboten
+	    Motor.A.setSpeed(400);
+ 		Motor.C.setSpeed(400);
+
+
+	// Beregn verdi for svart, hold sensor over svart teip
+		int svart = 0;
+		for (int i = 0; i<100; i++){
+			fargeLeser.fetchSample(fargeSample, 0);
+			svart += fargeSample[0]* 100;
+		}
+		svart = svart / 100 + 5; // finner en gjennomsnittsverdi for svart
+	System.out.println("Svart: " + svart);
+
+
+			if (fargeSample[0]*100 > svart){   // sjekk sort linje
+	          System.out.println(fargeSample[0]);  //printer verdi om den ikke = svart
+	       } else {
+			   // Kjør framover om fargesensor sier det er svart
+			   Motor.A.forward();
+			   Motor.C.forward();
+		   System.out.println("svart");
+	   }
+   }
+}
