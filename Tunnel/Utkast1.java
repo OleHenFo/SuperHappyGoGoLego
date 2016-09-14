@@ -26,7 +26,7 @@ public class Utkast1{
 		float dist = 0;
 		float retning = 1;
 		float press = 0;
-		float farge = 0;
+		float farge = 100;
 		float sound = 0;
 
 		// Definer boks
@@ -65,7 +65,7 @@ public class Utkast1{
 		SampleProvider leserT = sensorT.getTouchMode();
 		float[] dataT = new float[leserT.sampleSize()];
 
-		// Vent på knapp enter for å starte
+		// Vent pÃ¥ knapp enter for Ã¥ starte
 		lcd.drawString("Trykk enter starte", 0, 1);
 		keys.waitForAnyPress();
 
@@ -95,7 +95,7 @@ public class Utkast1{
 			leserU.fetchSample(dataU, 0);
 			dist = dataU[0];
 			if(dist > 0.06 || dist < 0.04){
-				//Leser avstand på nytt
+				//Leser avstand pÃ¥ nytt
 				if(dist < 0.04 && retning == 1){
 					Motor.B.setSpeed(50);
 					Motor.C.setSpeed(100);
@@ -132,7 +132,7 @@ public class Utkast1{
 			//Lager valg for fargesensor
 			leserF.fetchSample(dataF, 0);
 			farge = dataF[0];
-			if(farge == 0){
+			if(farge < 20){
 				retning = (retning == 1) ? 2:1;
 			}
 		}
