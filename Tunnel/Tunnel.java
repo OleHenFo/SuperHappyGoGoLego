@@ -18,13 +18,24 @@ import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 import lejos.hardware.sensor.*;
 import lejos.hardware.Sound;
+import java.util.Timer;
 
 public class Tunnel{
+
+	// Definer motorer
+	public static NXTRegulatedMotor hoyre;
+	public static NXTRegulatedMotor venstre;
+
 	public static void main(String[] args) throws Exception{
+		// Try catch (for feilmeldinger)
 		try {
 			//variabler
-			boolean go = true;
 			float dist = 0;
+			float press = 0;
+			float farge = 0;
+			float sound = 0;
+			int retning = 0;
+			int wait = 0;
 
 			// Definer boks
 			Brick legogo = BrickFinder.getDefault();
@@ -56,43 +67,139 @@ public class Tunnel{
 			NXTSoundSensor sensorL = new NXTSoundSensor(s2);
 			SampleProvider leserL = sensorL.getDBMode();
 			float[] dataL = new float[leserL.sampleSize()];
-			
-			// Definer trykk
+
+			// Definer trykksensor
 			EV3TouchSensor sensorT = new EV3TouchSensor(s1);
 			SampleProvider leserT = sensorT.getTouchMode();
 			float[] dataT = new float[leserT.sampleSize()];
 
-			// Vent pÃ¥ knapp enter for Ã¥ starte
+			// Vent på knapp enter for å starte
 			//lcd.drawString("Trykk enter starte", 0, 1);
 			//keys.waitForAnyPress();
 
-			// Hoved loop
-			//lcd.drawString("Kjorer", 0,5);
+			// Definer motorer
+			hoyre = Motor.C;
+			venstre = Motor.B;
 
+			// Sett fart
 			Motor.A.setSpeed(100);
-			Motor.B.setSpeed(300);
-			Motor.C.setSpeed(300);
+			hoyre.setSpeed(200); // VENSTRE
+			venstre.setSpeed(200); // HØYRE
 			Motor.D.setSpeed(100);
 
-			/*Motor.A.forward();
-			Motor.B.forward();
-			Motor.C.forward();
-			Motor.D.forward();*/
+			// Start motorer
+			//Motor.A.forward();
+			hoyre.forward();
+			venstre.forward();
+			//Motor.D.forward();
 
-			while (keys.readButtons()==0){
+			// Start hovedloop
+			while (true){
 
+				// Trykksensor ----------------------------
+				// Les trykksensor
+				leserT.fetchSample(dataT, 0);
+				press = dataT[0];
+
+				// Sjekk trykk
+				if(press>0){
+
+					// Stop motorer
+					hoyre.stop(true);
+					venstre.stop(true);
+
+					// Stop hovedloop
+					break;
+				}
+
+				// Lydsensor -------------------------------
+				// Les lyd
+				leserL.fetchSample(dataL, 0);
+				sound = dataL[0];
+
+				// Sjekk lyd
+				if(sound > 0.85){
+					// Stop motorer
+					hoyre.stop(true);
+					venstre.stop(true);
+
+					// Vent
+					Thread.sleep(5000);
+
+					//Start motorer i rett retning
+					if (retning==1){
+						hoyre.forward();
+						venstre.forward();
+					} else {
+						hoyre.backward();
+						venstre.backward();
+					}
+				}
+
+				// Sving/rettnings korreksjon --------------------
+				/*leserU.fetchSample(dataU, 0);
+				dist = dataU[0];
+				if(dist > 0.09 || dist < 0.04){
+					if (retning == 2){
+						if(dist < 0.04){
+							hoyre.setSpeed(100);
+							venstre.setSpeed(50);
+						} else if(dist > 0.09){
+							hoyre.setSpeed(50);
+							venstre.setSpeed(100);
+						}
+					} else {
+						if(dist < 0.04){
+							hoyre.setSpeed(100);
+							venstre.setSpeed(50);
+						} else if(dist > 0.09){
+							hoyre.setSpeed(50);
+							venstre.setSpeed(100);
+						}
+					}
+				} else */
+
+				// Kjør fram/tilbake ------------------------------
+				if (retning == 1){
+					hoyre.forward();
+					venstre.forward();
+				} else {
+					hoyre.backward();
+					venstre.backward();
+				}
+
+				// Farge sensor -----------------------------------
+				// Vent før ny lesing dersom nettop lest
+				if (wait==1){
+					wait = 0;
+					Thread.sleep(500);
+				}
+
+				// Les farge
+				leserF.fetchSample(dataF, 0);
+				farge = dataF[0];
+
+				//Sjekk farge
+				if(farge < 0.15){
+					retning = (retning==1) ? 2 : 1;
+					// Sett vent variabel før ny lesing
+					wait = 1;
+				}
+
+				// Skjerm ------------------------------------------
+				// Hent data
 				leserU.fetchSample(dataU, 0);
 				leserF.fetchSample(dataF, 0);
 				leserL.fetchSample(dataL, 0);
 				leserT.fetchSample(dataT, 0);
+				// Skriv data
 				lcd.drawString("Dist: "+dataU[0],0,2);
 				lcd.drawString("Farge: "+dataF[0],0,3);
 				lcd.drawString("Lyd: "+dataL[0],0,4);
 				lcd.drawString("Trykk: "+dataT[0],0,5);
-
-				Thread.sleep(10);
 			}
 		} catch (Exception e){
+			// Dersom exception, print den og vent 5 sec før programet stopper
 			System.out.println("Error: "+e);
 			Thread.sleep(5000);
 		}
