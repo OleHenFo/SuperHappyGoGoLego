@@ -139,23 +139,27 @@ public class Tunnel{
 				// Sving/rettnings korreksjon --------------------
 				leserU.fetchSample(dataU, 0);
 				dist = dataU[0];
-				if(dist > 0.08 || dist < 0.05){
+				if(dist != 0.055){
 					if (retning == 1){
-						if(dist < 0.05){
+						if(dist < 0.055){
 							hoyre.setSpeed(85);
 							venstre.setSpeed(100);
-						} else if(dist > 0.08){
+						} else if(dist > 0.055){
 							hoyre.setSpeed(100);
 							venstre.setSpeed(85);
 						}
 					} else {
-						if(dist < 0.05){
+						if(dist < 0.055){
 							hoyre.setSpeed(85);
 							venstre.setSpeed(100);
-						} else if(dist > 0.08){
+						} else if(dist > 0.055){
 							hoyre.setSpeed(100);
 							venstre.setSpeed(85);
 						}
+					}
+				} else {
+					hoyre.setSpeed(100);
+					venstre.setSpeed(100);
 					}
 
 				// Kjør fram/tilbake ------------------------------
