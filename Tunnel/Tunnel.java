@@ -73,7 +73,7 @@ public class Tunnel{
 			SampleProvider leserT = sensorT.getTouchMode();
 			float[] dataT = new float[leserT.sampleSize()];
 
-			// Vent på knapp enter for å starte
+			// Vent pÃ¥ knapp enter for Ã¥ starte
 			//lcd.drawString("Trykk enter starte", 0, 1);
 			//keys.waitForAnyPress();
 
@@ -84,7 +84,7 @@ public class Tunnel{
 			// Sett fart
 			Motor.A.setSpeed(100);
 			hoyre.setSpeed(200); // VENSTRE
-			venstre.setSpeed(200); // HØYRE
+			venstre.setSpeed(200); // HÃ˜YRE
 			Motor.D.setSpeed(100);
 
 			// Start motorer
@@ -137,29 +137,28 @@ public class Tunnel{
 				}
 
 				// Sving/rettnings korreksjon --------------------
-				/*leserU.fetchSample(dataU, 0);
+				leserU.fetchSample(dataU, 0);
 				dist = dataU[0];
-				if(dist > 0.09 || dist < 0.04){
-					if (retning == 2){
-						if(dist < 0.04){
-							hoyre.setSpeed(100);
-							venstre.setSpeed(50);
-						} else if(dist > 0.09){
-							hoyre.setSpeed(50);
+				if(dist > 0.08 || dist < 0.05){
+					if (retning == 1){
+						if(dist < 0.05){
+							hoyre.setSpeed(85);
 							venstre.setSpeed(100);
+						} else if(dist > 0.08){
+							hoyre.setSpeed(100);
+							venstre.setSpeed(85);
 						}
 					} else {
-						if(dist < 0.04){
-							hoyre.setSpeed(100);
-							venstre.setSpeed(50);
-						} else if(dist > 0.09){
-							hoyre.setSpeed(50);
+						if(dist < 0.05){
+							hoyre.setSpeed(85);
 							venstre.setSpeed(100);
+						} else if(dist > 0.08){
+							hoyre.setSpeed(100);
+							venstre.setSpeed(85);
 						}
 					}
-				} else */
 
-				// Kjør fram/tilbake ------------------------------
+				// KjÃ¸r fram/tilbake ------------------------------
 				if (retning == 1){
 					hoyre.forward();
 					venstre.forward();
@@ -169,7 +168,7 @@ public class Tunnel{
 				}
 
 				// Farge sensor -----------------------------------
-				// Vent før ny lesing dersom nettop lest
+				// Vent fÃ¸r ny lesing dersom nettop lest
 				if (wait==1){
 					wait = 0;
 					Thread.sleep(500);
@@ -182,7 +181,7 @@ public class Tunnel{
 				//Sjekk farge
 				if(farge < 0.15){
 					retning = (retning==1) ? 2 : 1;
-					// Sett vent variabel før ny lesing
+					// Sett vent variabel fÃ¸r ny lesing
 					wait = 1;
 				}
 
@@ -199,7 +198,7 @@ public class Tunnel{
 				lcd.drawString("Trykk: "+dataT[0],0,5);
 			}
 		} catch (Exception e){
-			// Dersom exception, print den og vent 5 sec før programet stopper
+			// Dersom exception, print den og vent 5 sec fÃ¸r programet stopper
 			System.out.println("Error: "+e);
 			Thread.sleep(5000);
 		}
