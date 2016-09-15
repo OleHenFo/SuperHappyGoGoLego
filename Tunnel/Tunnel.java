@@ -56,8 +56,13 @@ public class Tunnel{
 			NXTSoundSensor sensorL = new NXTSoundSensor(s2);
 			SampleProvider leserL = sensorL.getDBMode();
 			float[] dataL = new float[leserL.sampleSize()];
+			
+			// Definer trykk
+			EV3TouchSensor sensorT = new EV3TouchSensor(s1);
+			SampleProvider leserT = sensorT.getTouchMode();
+			float[] dataT = new float[leserT.sampleSize()];
 
-			// Vent på knapp enter for å starte
+			// Vent pÃ¥ knapp enter for Ã¥ starte
 			//lcd.drawString("Trykk enter starte", 0, 1);
 			//keys.waitForAnyPress();
 
@@ -79,9 +84,11 @@ public class Tunnel{
 				leserU.fetchSample(dataU, 0);
 				leserF.fetchSample(dataF, 0);
 				leserL.fetchSample(dataL, 0);
+				leserT.fetchSample(dataT, 0);
 				lcd.drawString("Dist: "+dataU[0],0,2);
 				lcd.drawString("Farge: "+dataF[0],0,3);
 				lcd.drawString("Lyd: "+dataL[0],0,4);
+				lcd.drawString("Trykk: "+dataT[0],0,5);
 
 				Thread.sleep(10);
 			}
