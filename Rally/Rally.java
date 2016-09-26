@@ -31,7 +31,14 @@ public class Rally{
 		try {
 			//variabler
 			float dist = 0;
-			float farge = 0;
+			float fargeV = 0;
+			float fargeH = 0;
+			float mid = 0;
+			boolean svinger = false;
+			int svingV = 0;
+			int svingH = 0;
+			int sving = 0;
+			int kryss = 0;
 
 			// Decimaltall formatering (for skjerm)
 			DecimalFormat df = new DecimalFormat("#.###");
@@ -53,14 +60,19 @@ public class Rally{
 			Port s4 = legogo.getPort("S4");
 
 			// Definer ultra sensor
-			EV3UltrasonicSensor sensorU = new EV3UltrasonicSensor(s4);
+			/*EV3UltrasonicSensor sensorU = new EV3UltrasonicSensor(s4);
 			SampleProvider leserU = sensorU.getDistanceMode();
-			float[] dataU = new float[leserU.sampleSize()];
+			float[] dataU = new float[leserU.sampleSize()];*/
 
-			// Definer lyssensor
-			EV3ColorSensor sensorF = new EV3ColorSensor(s1);
-			SampleProvider leserF = sensorF.getRGBMode();
-			float[] dataF = new float[leserF.sampleSize()];
+			// Definer lyssensor Venstre
+			EV3ColorSensor sensorFV = new EV3ColorSensor(s1);
+			SampleProvider leserFV = sensorFV.getRGBMode();
+			float[] dataFV = new float[leserFV.sampleSize()];
+
+			// Definer lyssensor Høyre
+			EV3ColorSensor sensorFH = new EV3ColorSensor(s2);
+			SampleProvider leserFH = sensorFH.getRGBMode();
+			float[] dataFH = new float[leserFH.sampleSize()];
 
 			// Vent på trykk før kalibrering av svart
 			lcd.drawString("Trykk for svart...", 0, 1);
@@ -69,8 +81,8 @@ public class Rally{
 			float svart = 0;
 			// Loop 100 ganger og mål svart for å ungå feilmåling
 			for (int i = 0; i<100; i++){
-				leserF.fetchSample(dataF, 0);
-				svart += dataF[0] * 100;
+				leserFV.fetchSample(dataFV, 0);
+				svart += dataFV[0] * 100;
 			}
 			svart = svart / 100 + 5; // Finn gjennomsnittsverdi for svart
 			lcd.drawString("Svart: " + svart,0,2); // Skriv på skjerm, plass 2
@@ -81,23 +93,24 @@ public class Rally{
 			float hvit = 0;
 			// Loop 100 ganger og mål hvit for å ungå feilmåling
 			for (int i = 0; i<100; i++){
-				leserF.fetchSample(dataF, 0);
-				hvit += dataF[0] * 100;
+				leserFV.fetchSample(dataFV, 0);
+				hvit += dataFV[0] * 100;
 			}
 			hvit = hvit / 100 + 5; // Finn gjennomsnittsverdi for hvit
 			lcd.drawString("Hvit: " + hvit,0,3); // Skriv på skjerm, plass 3
 
 			// Definer motorer
-			hoyre = Motor.B;
-			venstre = Motor.C;
+			hoyre = Motor.D;
+			venstre = Motor.A;
 			// Sett fart
-			hoyre.setSpeed(100);
-			venstre.setSpeed(100);
+			hoyre.setSpeed(300);
+			venstre.setSpeed(300);
 
 			// Vent på knapp før hovedloop starter
 			lcd.drawString("Trykk for å starte", 0, 4);
 			keys.waitForAnyPress();
 			lcd.clear();
+			Thread.sleep(1000);
 
 			// Start motorer
 			hoyre.forward();
@@ -117,26 +130,81 @@ public class Rally{
 				}
 
 				// Hent data fra sensorer
-				leserU.fetchSample(dataU, 0);
-				leserF.fetchSample(dataF, 0);
+				//leserU.fetchSample(dataU, 0);
+				leserFV.fetchSample(dataFV, 0);
+				leserFH.fetchSample(dataFH, 0);
 				// Sett data i variabler (gang med 100 for å matche gjennomsnittsmålingene)
-				dist = dataU[0]*100;
-				farge = dataF[0]*100;
+				//dist = dataU[0]*100;
+				fargeV = dataFV[0]*100;
+				fargeH = dataFH[0]*100;
 
 				// Skriv data på skjerm
-				lcd.drawString("Dist: "+df.format(dist),0,3);
-				lcd.drawString("Farge: "+df.format(farge),0,4);
+				//lcd.drawString("Dist: "+df.format(dist),0,3);
+				//lcd.drawString("FargeV: "+df.format(fargeV),0,2);
+				//lcd.drawString("FargeH: "+df.format(fargeH),0,3);
 
-
+				// TO SENSOR KODE
 				// Sjekk farge, set speed
 				// Er fargen over eller under snittet mellom svart/hvit?
-				if (farge>((svart+hvit)/2)){
-					hoyre.setSpeed(200);
-					venstre.setSpeed(40);
-				} else if (farge<((svart+hvit)/2)){
-					hoyre.setSpeed(40);
-					venstre.setSpeed(200);
+				mid = ((hvit+svart)/2);
+				if (kryss == 0){
+					if (fargeV<(hvit-mid)){			// Sving venstre
+						if (!svinger){
+							svingH=0;
+							svingV++;
+						}
+						svinger = true;
+						hoyre.setSpeed(320);
+						venstre.setSpeed(20);
+					} else if (fargeH<(hvit-mid)){	// Sving høyre
+						if (!svinger){
+							svingV=0;
+							svingH++;
+						}
+						svinger = true;
+						hoyre.setSpeed(20);
+						venstre.setSpeed(320);
+					} else {						// Kjør
+						svinger=false;
+						hoyre.setSpeed(330);
+						venstre.setSpeed(330);
+					}
+				} else {							// BYTT SVINGPRIORITET ETTER KRYSS
+					if (fargeH<(hvit-mid)){			// Sving høyre
+						if (!svinger){
+							svingV=0;
+							svingH++;
+						}
+						svinger = true;
+						hoyre.setSpeed(20);
+						venstre.setSpeed(320);
+					} else if (fargeV<(hvit-mid)){	// Sving venstre
+						if (!svinger){
+							svingH=0;
+							svingV++;
+						}
+						svinger = true;
+						hoyre.setSpeed(320);
+						venstre.setSpeed(20);
+					} else {						// Kjør
+						svinger=false;
+						hoyre.setSpeed(330);
+						venstre.setSpeed(330);
+					}
 				}
+				if (svingV>=5 || svingH>=5){ // Øk total sving variabel dersom svingV/H > 4
+					svingV=0;
+					svingH=0;
+					sving++;
+				}
+				if (sving>=8){	// Bytt kryss dersom sving > 5
+					sving = 2;
+					kryss = (kryss==0)?1:0;
+				}
+				lcd.drawString("svingV: "+svingV,0,2);
+				lcd.drawString("svingH: "+svingH,0,3);
+				lcd.drawString("sving: "+sving,0,4);
+				lcd.drawString("kryss: "+kryss,0,5);
 			}
 		} catch (Exception e){
 			// Dersom exception, print den og vent 5 sec før programet stopper
