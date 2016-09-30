@@ -41,6 +41,7 @@ public class Rally{
 			int svingV = 0;
 			int svingH = 0;
 			int sving = 0;
+			int felle = 0;
 			int kryss = 0;
 			int waitCount = 0;
 			long time = 0;
@@ -107,7 +108,6 @@ public class Rally{
 			// Definer motorer
 			hoyre = Motor.D;
 			venstre = Motor.A;
-			bak = Motor.C;
 
 			// Sett fart
 			hoyre.setSpeed(300);
@@ -123,11 +123,6 @@ public class Rally{
 			// Start motorer
 			hoyre.forward();
 			venstre.forward();
-
-			//Starter tråd "Traps"
-
-	        (new Traps()).start();
-
 
 			// Start hovedloop
 			while (true){
@@ -210,6 +205,7 @@ public class Rally{
 					svingV=0;
 					svingH=0;
 					sving++;
+					felle++;
 				}
 				if (sving==5){	// Bytt kryss dersom sving > 5
 					sving = 1;
@@ -222,6 +218,13 @@ public class Rally{
 						wait = false;
 					}
 				}
+				if (felle == 9){
+					Motor.C.setSpeed(30);
+				}
+				if (felle == 12){
+					Motor.C.setSpeed(0);
+				}
+
 				lcd.drawString("wait: "+wait,0,1);
 				lcd.drawString("svingV: "+svingV,0,2);
 				lcd.drawString("svingH: "+svingH,0,3);
@@ -237,23 +240,4 @@ public class Rally{
 			Thread.sleep(5000);
 		}
 	}
-}
-
-class Traps extends Thread {
-
-    public void run() {
-        System.out.println("Test");
-        try {
-        	Thread.sleep(5000);
-		}
-		catch (Exception e){
-			System.out.println("SHSHSH drit");
-		}
-        Sound.beep();
-    }
-
-    public static void main(String args[]) {
-        (new Traps()).start();
-    }
-
 }
