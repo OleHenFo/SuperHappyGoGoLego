@@ -25,6 +25,7 @@ public class Rally{
 	// Definer motorer
 	public static NXTRegulatedMotor hoyre;
 	public static NXTRegulatedMotor venstre;
+	public static NXTRegulatedMotor bak;
 
 	public static void main(String[] args) throws Exception{
 
@@ -64,54 +65,57 @@ public class Rally{
 			Port s4 = legogo.getPort("S4");
 
 			// Definer ultra sensor
-			/*EV3UltrasonicSensor sensorU = new EV3UltrasonicSensor(s4);
+			EV3UltrasonicSensor sensorU = new EV3UltrasonicSensor(s3);
 			SampleProvider leserU = sensorU.getDistanceMode();
-			float[] dataU = new float[leserU.sampleSize()];*/
+			float[] dataU = new float[leserU.sampleSize()];
 
 			// Definer lyssensor Venstre
 			EV3ColorSensor sensorFV = new EV3ColorSensor(s1);
 			SampleProvider leserFV = sensorFV.getRGBMode();
 			float[] dataFV = new float[leserFV.sampleSize()];
 
-			// Definer lyssensor Høyre
+			// Definer lyssensor HÃ¸yre
 			EV3ColorSensor sensorFH = new EV3ColorSensor(s2);
 			SampleProvider leserFH = sensorFH.getRGBMode();
 			float[] dataFH = new float[leserFH.sampleSize()];
 
-			// Vent på trykk før kalibrering av svart
+			// Vent pÃ¥ trykk fÃ¸r kalibrering av svart
 			lcd.drawString("Trykk for svart...", 0, 1);
 			keys.waitForAnyPress();
 
 			float svart = 0;
-			// Loop 100 ganger og mål svart for å ungå feilmåling
+			// Loop 100 ganger og mÃ¥l svart for Ã¥ ungÃ¥ feilmÃ¥ling
 			for (int i = 0; i<100; i++){
 				leserFV.fetchSample(dataFV, 0);
 				svart += dataFV[0] * 100;
 			}
 			svart = svart / 100 + 5; // Finn gjennomsnittsverdi for svart
-			lcd.drawString("Svart: " + svart,0,2); // Skriv på skjerm, plass 2
+			lcd.drawString("Svart: " + svart,0,2); // Skriv pÃ¥ skjerm, plass 2
 
-			// Vent på trykk før kalibrering av hvit
+			// Vent pÃ¥ trykk fÃ¸r kalibrering av hvit
 			lcd.drawString("Trykk for hvit...", 0, 1);
 			keys.waitForAnyPress();
 			float hvit = 0;
-			// Loop 100 ganger og mål hvit for å ungå feilmåling
+			// Loop 100 ganger og mÃ¥l hvit for Ã¥ ungÃ¥ feilmÃ¥ling
 			for (int i = 0; i<100; i++){
 				leserFV.fetchSample(dataFV, 0);
 				hvit += dataFV[0] * 100;
 			}
 			hvit = hvit / 100 + 5; // Finn gjennomsnittsverdi for hvit
-			lcd.drawString("Hvit: " + hvit,0,3); // Skriv på skjerm, plass 3
+			lcd.drawString("Hvit: " + hvit,0,3); // Skriv pÃ¥ skjerm, plass 3
 
 			// Definer motorer
 			hoyre = Motor.D;
 			venstre = Motor.A;
+			bak = Motor.C;
+
 			// Sett fart
 			hoyre.setSpeed(300);
 			venstre.setSpeed(300);
+			bak.setSpeed(0);
 
-			// Vent på knapp før hovedloop starter
-			lcd.drawString("Trykk for å starte", 0, 4);
+			// Vent pÃ¥ knapp fÃ¸r hovedloop starter
+			lcd.drawString("Trykk for Ã¥ starte", 0, 4);
 			keys.waitForAnyPress();
 			lcd.clear();
 			Thread.sleep(1000);
@@ -120,10 +124,15 @@ public class Rally{
 			hoyre.forward();
 			venstre.forward();
 
+			//Starter trÃ¥d "Traps"
+
+	        (new Traps()).start();
+
+
 			// Start hovedloop
 			while (true){
 
-				// Sjekk om trykket på knapp og avslutt
+				// Sjekk om trykket pÃ¥ knapp og avslutt
 				if (keys.readButtons()>0){
 					lcd.clear();
 					hoyre.stop(true);
@@ -134,15 +143,15 @@ public class Rally{
 				}
 
 				// Hent data fra sensorer
-				//leserU.fetchSample(dataU, 0);
+				leserU.fetchSample(dataU, 0);
 				leserFV.fetchSample(dataFV, 0);
 				leserFH.fetchSample(dataFH, 0);
-				// Sett data i variabler (gang med 100 for å matche gjennomsnittsmålingene)
-				//dist = dataU[0]*100;
+				// Sett data i variabler (gang med 100 for Ã¥ matche gjennomsnittsmÃ¥lingene)
+				dist = dataU[0]*100;
 				fargeV = dataFV[0]*100;
 				fargeH = dataFH[0]*100;
 
-				// Skriv data på skjerm
+				// Skriv data pÃ¥ skjerm
 				//lcd.drawString("Dist: "+df.format(dist),0,3);
 				//lcd.drawString("FargeV: "+df.format(fargeV),0,2);
 				//lcd.drawString("FargeH: "+df.format(fargeH),0,3);
@@ -160,7 +169,7 @@ public class Rally{
 						svinger = true;
 						hoyre.setSpeed(320);
 						venstre.setSpeed(20);
-					} else if (fargeH<(hvit-mid)){	// Sving høyre
+					} else if (fargeH<(hvit-mid)){	// Sving hÃ¸yre
 						if (!svinger && !wait){
 							svingV=0;
 							svingH++;
@@ -168,13 +177,13 @@ public class Rally{
 						svinger = true;
 						hoyre.setSpeed(20);
 						venstre.setSpeed(320);
-					} else {						// Kjør
+					} else {						// KjÃ¸r
 						svinger=false;
 						hoyre.setSpeed(330);
 						venstre.setSpeed(330);
 					}
 				} else {							// BYTT SVINGPRIORITET ETTER KRYSS
-					if (fargeH<(hvit-mid)){			// Sving høyre
+					if (fargeH<(hvit-mid)){			// Sving hÃ¸yre
 						if (!svinger && !wait){
 							svingV=0;
 							svingH++;
@@ -190,13 +199,13 @@ public class Rally{
 						svinger = true;
 						hoyre.setSpeed(320);
 						venstre.setSpeed(20);
-					} else {						// Kjør
+					} else {						// KjÃ¸r
 						svinger=false;
 						hoyre.setSpeed(330);
 						venstre.setSpeed(330);
 					}
 				}
-				if (svingV>=5 || svingH>=5 && !wait){ // Øk total sving variabel dersom svingV/H > 4
+				if (svingV>=5 || svingH>=5 && !wait){ // Ã˜k total sving variabel dersom svingV/H > 4
 					wait = true;
 					svingV=0;
 					svingH=0;
@@ -206,7 +215,7 @@ public class Rally{
 					sving = 1;
 					kryss = (kryss==0)?1:0;
 				}
-				if (wait){ // Dersom wait, tell til 12000 før ny svingteller
+				if (wait){ // Dersom wait, tell til 1200 fÃ¸r ny svingteller
 					waitCount++;
 					if (waitCount>1200){
 						waitCount = 0;
@@ -218,11 +227,33 @@ public class Rally{
 				lcd.drawString("svingH: "+svingH,0,3);
 				lcd.drawString("sving: "+sving,0,4);
 				lcd.drawString("kryss: "+kryss,0,5);
+
+
+
 			}
 		} catch (Exception e){
-			// Dersom exception, print den og vent 5 sec før programet stopper
+			// Dersom exception, print den og vent 5 sec fÃ¸r programet stopper
 			System.out.println("Error: "+e);
 			Thread.sleep(5000);
 		}
 	}
+}
+
+class Traps extends Thread {
+
+    public void run() {
+        System.out.println("Test");
+        try {
+        	Thread.sleep(5000);
+		}
+		catch (Exception e){
+			System.out.println("SHSHSH drit");
+		}
+        Sound.beep();
+    }
+
+    public static void main(String args[]) {
+        (new Traps()).start();
+    }
+
 }
