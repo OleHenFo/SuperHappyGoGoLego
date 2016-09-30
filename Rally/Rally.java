@@ -19,14 +19,15 @@ import lejos.robotics.SampleProvider;
 import lejos.hardware.sensor.*;
 import lejos.hardware.Sound;
 import java.text.DecimalFormat;
+import java.util.*;
 
 public class Rally{
-
 	// Definer motorer
 	public static NXTRegulatedMotor hoyre;
 	public static NXTRegulatedMotor venstre;
 
 	public static void main(String[] args) throws Exception{
+
 		// Try catch (for feilmeldinger)
 		try {
 			//variabler
@@ -35,10 +36,13 @@ public class Rally{
 			float fargeH = 0;
 			float mid = 0;
 			boolean svinger = false;
+			boolean wait = false;
 			int svingV = 0;
 			int svingH = 0;
 			int sving = 0;
 			int kryss = 0;
+			int waitCount = 0;
+			long time = 0;
 
 			// Decimaltall formatering (for skjerm)
 			DecimalFormat df = new DecimalFormat("#.###");
@@ -149,7 +153,7 @@ public class Rally{
 				mid = ((hvit+svart)/2);
 				if (kryss == 0){
 					if (fargeV<(hvit-mid)){			// Sving venstre
-						if (!svinger){
+						if (!svinger && !wait){
 							svingH=0;
 							svingV++;
 						}
@@ -157,7 +161,7 @@ public class Rally{
 						hoyre.setSpeed(320);
 						venstre.setSpeed(20);
 					} else if (fargeH<(hvit-mid)){	// Sving høyre
-						if (!svinger){
+						if (!svinger && !wait){
 							svingV=0;
 							svingH++;
 						}
@@ -171,7 +175,7 @@ public class Rally{
 					}
 				} else {							// BYTT SVINGPRIORITET ETTER KRYSS
 					if (fargeH<(hvit-mid)){			// Sving høyre
-						if (!svinger){
+						if (!svinger && !wait){
 							svingV=0;
 							svingH++;
 						}
@@ -179,7 +183,7 @@ public class Rally{
 						hoyre.setSpeed(20);
 						venstre.setSpeed(320);
 					} else if (fargeV<(hvit-mid)){	// Sving venstre
-						if (!svinger){
+						if (!svinger && !wait){
 							svingH=0;
 							svingV++;
 						}
@@ -192,15 +196,24 @@ public class Rally{
 						venstre.setSpeed(330);
 					}
 				}
-				if (svingV>=5 || svingH>=5){ // Øk total sving variabel dersom svingV/H > 4
+				if (svingV>=5 || svingH>=5 && !wait){ // Øk total sving variabel dersom svingV/H > 4
+					wait = true;
 					svingV=0;
 					svingH=0;
 					sving++;
 				}
-				if (sving>=8){	// Bytt kryss dersom sving > 5
-					sving = 2;
+				if (sving==5){	// Bytt kryss dersom sving > 5
+					sving = 1;
 					kryss = (kryss==0)?1:0;
 				}
+				if (wait){ // Dersom wait, tell til 12000 før ny svingteller
+					waitCount++;
+					if (waitCount>1200){
+						waitCount = 0;
+						wait = false;
+					}
+				}
+				lcd.drawString("wait: "+wait,0,1);
 				lcd.drawString("svingV: "+svingV,0,2);
 				lcd.drawString("svingH: "+svingH,0,3);
 				lcd.drawString("sving: "+sving,0,4);
