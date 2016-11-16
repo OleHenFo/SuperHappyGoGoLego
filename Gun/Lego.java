@@ -1,14 +1,6 @@
 import lejos.hardware.motor.*;
 import lejos.hardware.lcd.*;
-import lejos.hardware.sensor.EV3TouchSensor;
-import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
-import lejos.hardware.sensor.EV3GyroSensor;
-import lejos.hardware.sensor.NXTTouchSensor;
-import lejos.hardware.sensor.NXTLightSensor;
-import lejos.hardware.sensor.NXTColorSensor;
-import lejos.hardware.sensor.NXTSoundSensor;
-import lejos.hardware.sensor.NXTUltrasonicSensor;
 import lejos.hardware.port.Port;
 import lejos.hardware.Brick;
 import lejos.hardware.BrickFinder;
@@ -29,22 +21,24 @@ public class Lego{
 	public static RegulatedMotor b = Motor.B;
 	public static RegulatedMotor spin = Motor.C;
 
+	//variabler
 	private static int reloadSpeed = 400;
 	private static int spinSpeed = 10;
 	private static float dist;
 	private static boolean ladd = false;
+	private static int antSkudd = 0;
 
 	private DecimalFormat df = new DecimalFormat("#.###");
 
 	// Definer boks
 	static Brick legogo = BrickFinder.getDefault();
 	static EV3 ev3 = (EV3) BrickFinder.getLocal();
+	/**
+	* Spør om hva forskjellen mellom getDefault() og getLocal()
+	*/
 
 	// Definer porter
 	static Port s1 = legogo.getPort("S1");
-	Port s2 = legogo.getPort("S2");
-	Port s3 = legogo.getPort("S3");
-	Port s4 = legogo.getPort("S4");
 
 	// Definer ultra sensor
 	static EV3UltrasonicSensor sensorU = new EV3UltrasonicSensor(s1);
@@ -57,14 +51,10 @@ public class Lego{
 	// Definer knapper
 	public static Keys keys = ev3.getKeys();
 
-	// Definer motorer
-	/*a = Motor.A;
-	b = Motor.B;
-	spin = Motor.C;*/
 
-	//Klasse for å lade
+	//Metode for å lade
 	public static void lade(){
-
+		lcd.clear();
 		lcd.drawString("Reloading",0,2);
 
 		spin.stop(true);
@@ -85,12 +75,14 @@ public class Lego{
 		a.waitComplete();
 		b.waitComplete();
 
-		lcd.drawString("Reloading: Complete",0,2);
 		lcd.clear();
+		lcd.drawString("Reloading: Complete",0,2);
 		ladd = true;
 	}
 
+	//Metode for avfyring
 	public static void ild(){
+		lcd.clear();
 		lcd.drawString("TARGET AQUIRED",0,2);
 
 		spin.rotate(15, true);
@@ -108,88 +100,69 @@ public class Lego{
 		a.waitComplete();
 		b.waitComplete();
 
+		lcd.clear();
 		lcd.drawString("TARGET DESTROYED",0,2);
+
+		antSkudd++;
 
 		ladd = false;
 	}
 
+	// Main metode
 	public static void main(String[] args) throws Exception{
-
-
-		//variabler
-
-
-		// Decimaltall formatering (for skjerm)
-
-
-
 
 		// Sett fart
 		a.setSpeed(reloadSpeed);
 		b.setSpeed(reloadSpeed);
 		spin.setSpeed(spinSpeed);
 
-		// Vent på knapp for hovedloop starter
+		// Vent på knapp før programmet fortsetter
 		lcd.drawString("Trykk for å starte", 0, 2);
 		keys.waitForAnyPress();
 		lcd.clear();
-		Thread.sleep(1000);
+		Thread.sleep(500);
 
+		// Start hovedloop
+		while(!false){
 
+			//Er magasinet tomt, stopp hovedloopen
+			if(antSkudd >= 7)break;
 
-		// Start
-
-		while(true){
-
-			if(ladd == false){
+			//Dersom våpenet ikke er ladd, ladd våpenet
+			if(!ladd){
 				lade();
 			}
 
-			while(ladd == true){
+			// Søk etter mål mens våpenet er ladd
+			while(ladd){
 				if (keys.readButtons()>0){
-								break;
+					break;
 				}
 
 				leserU.fetchSample(dataU, 0);
 				dist = dataU[0];
+				lcd.drawString("Searching...",0,2);
 				lcd.drawString("UV: " + dist,0,4);
+				lcd.drawString("Ammo: "+(7-antSkudd),0,5);
 				if((dist<0.8)&&(dist>0.05)){
 					ild();
 				}
 				spin.forward();
 			}
-			/*if ((dist<1)&&(dist>0.05)){
-				lcd.drawString("TARGET AQUIRED",0,2);
-				spin.stop(true);
 
-				a.startSynchronization();
-				a.rotate(-40, true);
-				b.rotate(-40, true);
-				a.endSynchronization();
+			// Stop hovedloop dersom knapp trykkes
+			if (keys.readButtons()>0){
+				break;
+			}
+		}//end hovedloop
 
-				a.waitComplete();
-				b.waitComplete();
-
-				a.startSynchronization();
-				a.rotate(360, true);
-				b.rotate(360, true);
-				a.endSynchronization();
-
-				a.waitComplete();
-				b.waitComplete();
-
-				a.startSynchronization();
-				a.rotate(-320, true);
-				b.rotate(-320, true);
-				a.endSynchronization();
-
-				a.waitComplete();
-				b.waitComplete();
-
-			} else {
-				lcd.drawString("Searching.......",0,2);
-				spin.forward();
-			}*/
-		}//end while(true)
+		//Kjøres før programmet avslutter
+		lcd.clear();
+		lcd.drawString("Programmet avsluttes", 0, 2);
+		try{
+			Thread.sleep(3000);
+		}
+		catch(Exception e){
+		}
 	}
 }
